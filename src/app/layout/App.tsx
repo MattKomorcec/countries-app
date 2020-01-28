@@ -18,7 +18,7 @@ const App: React.FC = () => {
         render={() => (
           <Fragment>
             <NavBar />
-            <Container style={{ marginTop: "50px" }}>
+            <Container style={{ paddingTop: "91px" }} fluid>
               <Switch>
                 <Route exact path="/countries" component={CountriesList} />
                 <Route path="/countries/:id" component={CountryDetails} />

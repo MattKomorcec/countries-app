@@ -1,8 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Grid, Header, Card, Image } from "semantic-ui-react";
+import { Grid, Button, Divider, Container } from "semantic-ui-react";
 import { RouteComponentProps, Link } from "react-router-dom";
 import { CountryStoreContext } from "../../app/stores/countryStore";
 import { ICountry } from "../../app/models/country";
+import CountryDetailsStatsMap from "./CountryDetailsStatsMap";
+import CountryBorders from "./CountryBorders";
+import { MAIN_COLOR, WHITE } from "../../app/common/util";
 
 interface ICountryDetailsParams {
   id: string;
@@ -13,80 +16,43 @@ const CountryDetails: React.FC<RouteComponentProps<ICountryDetailsParams>> = ({
 }) => {
   const [country, setCountry] = useState<ICountry | undefined>(undefined);
   const countryStore = useContext(CountryStoreContext);
-  const { loading, getCountry } = countryStore;
+  const { getCountry } = countryStore;
 
   useEffect(() => {
     setCountry(getCountry(match.params.id));
   }, [getCountry, match.params.id]);
 
   if (!country) {
-    return <p>No country found!</p>;
+    return (
+      <Grid.Column width={16} textAlign="center">
+        <Button
+          as={Link}
+          to="/countries"
+          content="Back to all countries"
+          style={{ backgroundColor: MAIN_COLOR, color: WHITE }}
+          fluid
+        />
+      </Grid.Column>
+    );
   }
 
-  return loading ? (
-    <Grid.Column width={16}>
-      <p>Loading country...</p>
-    </Grid.Column>
-  ) : (
-    <Grid.Column width={16}>
-      <Header
-        as="h1"
-        content={country.name}
-        textAlign="center"
-        image={country.flag}
-        style={{ marginBottom: "50px" }}
-      />
-      <Card.Group itemsPerRow={1}>
-        <Card fluid>
-          <Card.Content>
-            <Card.Header>
-              {country.capital || "Unknown"} - capital city
-            </Card.Header>
-            <Card.Meta>In {country.subregion}</Card.Meta>
-            <Card.Description>
-              <ul>
-                <li>Alpha2Code: {country.alpha2Code}</li>
-                <li>Alpha3Code: {country.alpha3Code}</li>
-                <li>Area: {country.area}</li>
-                <li>Cioc: {country.cioc}</li>
-                <li>Native name: {country.nativeName}</li>
-                <li>Domain: {country.topLevelDomain.join(",")}</li>
-                <li>Population: {country.population}</li>
-                <li>Numeric code: {country.numericCode}</li>
-                <li>Coordinates: {country.latlng.join(", ")}</li>
-                <li>Calling code(s): {country.callingCodes.join(", ")}</li>
-              </ul>
-            </Card.Description>
-          </Card.Content>
-        </Card>
-        <Card fluid>
-          <Card.Content>
-            <Card.Header>Zimbabwe</Card.Header>
-            <Card.Meta>In Europe</Card.Meta>
-            <Card.Description>Zimbabwe is an amazing country</Card.Description>
-          </Card.Content>
-        </Card>
-      </Card.Group>
-      <Header as="h2" content="Bordering countries" />
-      {country.borders.length === 0 ? (
-        <p>{country.name} has no neighbours!</p>
-      ) : (
-        <Card.Group itemsPerRow={3}>
-          {country.borders.map(key => {
-            const ctry = getCountry(key);
-
-            return (
-              <Card
-                key={ctry.alpha3Code}
-                as={Link}
-                to={`/countries/${ctry.alpha3Code}`}
-                header={ctry.name}
-              />
-            );
-          })}
-        </Card.Group>
-      )}
-    </Grid.Column>
+  return (
+    <Container>
+      <Grid.Column width={16} style={{ paddingBottom: "50px" }}>
+        <CountryDetailsStatsMap country={country} />
+        <Divider />
+        <CountryBorders borders={country.borders} getCountry={getCountry} />
+        <Grid.Column width={16} textAlign="center">
+          <Button
+            as={Link}
+            to="/countries"
+            content="Back to all countries"
+            style={{ backgroundColor: MAIN_COLOR, color: WHITE }}
+            fluid
+          />
+        </Grid.Column>
+      </Grid.Column>
+    </Container>
   );
 };
 

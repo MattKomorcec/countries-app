@@ -1,6 +1,7 @@
 import React from "react";
 import { Segment, Container, Header, Button } from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import { MAIN_COLOR, WHITE } from "../../app/common/util";
 
 const styles = {
   display: "flex",
@@ -17,8 +18,14 @@ const Home = () => {
         <Header as="h1" inverted>
           Welcome to the Countries App
         </Header>
-        <Button as={Link} to="/countries" size="huge" inverted>
-          Go to list of countries
+        <Button
+          as={Link}
+          to="/countries"
+          size="huge"
+          inverted
+          style={{ backgroundColor: MAIN_COLOR, color: WHITE }}
+        >
+          Go to countries
         </Button>
       </Container>
     </Segment>

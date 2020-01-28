@@ -1,16 +1,10 @@
 import React, { useEffect, useContext } from "react";
-import {
-  Table,
-  Image,
-  Grid,
-  Pagination,
-  Loader,
-  PaginationProps
-} from "semantic-ui-react";
-import { ICountry } from "../../app/models/country";
-import { history } from "../../index";
+import { Table, Grid, Loader, Header, Container } from "semantic-ui-react";
 import { observer } from "mobx-react-lite";
 import { CountryStoreContext } from "../../app/stores/countryStore";
+import CountriesListHeader from "./CountriesListHeader";
+import CountriesListBody from "./CountriesListBody";
+import CountriesListFooter from "./CountriesListFooter";
 
 const CountriesList = () => {
   const countryStore = useContext(CountryStoreContext);
@@ -28,70 +22,32 @@ const CountriesList = () => {
     loadCountries();
   }, [loadCountries]);
 
-  const handlePageChange = (
-    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
-    data: PaginationProps
-  ) => {
-    if (data.activePage) {
-      const activePage = parseInt(`${data.activePage}`);
-      setCurrentPage(activePage || 1);
-    }
-  };
+  if (loading) {
+    return <Loader active>Loading...</Loader>;
+  }
 
-  const handleRowClick = (country: ICountry) => {
-    history.push(`/countries/${country.alpha3Code}`);
-  };
+  if (!renderedCountries) {
+    return <p>Something went wrong. Please refresh</p>;
+  }
 
-  return loading ? (
-    <Grid.Column width={16}>
-      <Loader content="Loading..." />
-    </Grid.Column>
-  ) : (
-    <Grid.Column width={16}>
-      <Table selectable>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell></Table.HeaderCell>
-            <Table.HeaderCell onClick={() => setActiveFilter("name")}>
-              Name
-            </Table.HeaderCell>
-            <Table.HeaderCell>Capital</Table.HeaderCell>
-            <Table.HeaderCell onClick={() => setActiveFilter("population")}>
-              Population
-            </Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-
-        <Table.Body>
-          {renderedCountries &&
-            renderedCountries.map((country: ICountry) => (
-              <Table.Row
-                key={country.name}
-                onClick={() => handleRowClick(country)}
-              >
-                <Table.Cell>
-                  <Image src={country.flag} size="mini" />
-                </Table.Cell>
-                <Table.Cell>{country.name}</Table.Cell>
-                <Table.Cell>{country.capital}</Table.Cell>
-                <Table.Cell>{country.population}</Table.Cell>
-              </Table.Row>
-            ))}
-        </Table.Body>
-
-        <Table.Footer>
-          <Table.Row>
-            <Table.HeaderCell colSpan="4" textAlign="center">
-              <Pagination
-                totalPages={totalPages}
-                activePage={currentPage}
-                onPageChange={handlePageChange}
-              />
-            </Table.HeaderCell>
-          </Table.Row>
-        </Table.Footer>
-      </Table>
-    </Grid.Column>
+  return (
+    <Container>
+      <Grid.Column width={16}>
+        <Header
+          as="h1"
+          content="Click on the country to see details or filter by name or population"
+        />
+        <Table selectable sortable>
+          <CountriesListHeader setActiveFilter={setActiveFilter} />
+          <CountriesListBody countries={renderedCountries} />
+          <CountriesListFooter
+            totalPages={totalPages}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+        </Table>
+      </Grid.Column>
+    </Container>
   );
 };
 

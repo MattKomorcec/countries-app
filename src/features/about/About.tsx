@@ -1,19 +1,24 @@
 import React from "react";
-import { Card } from "semantic-ui-react";
+import { Card, Container } from "semantic-ui-react";
 
 const About = () => {
   return (
-    <Card fluid>
-      <Card.Content header="Tech stack" />
-      <Card.Content>
-        <ul>
-          <li>JavaScript, HTML, CSS</li>
-          <li>TypeScript</li>
-          <li>React</li>
-          <li>React-router</li>
-        </ul>
-      </Card.Content>
-    </Card>
+    <Container>
+      <Card fluid>
+        <Card.Content header="Tech stack" />
+        <Card.Content>
+          <ul>
+            <li>TypeScript</li>
+            <li>React</li>
+            <li>React-router</li>
+            <li>MobX</li>
+            <li>Semantic UI</li>
+            <li>Axios</li>
+            <li>Cypress</li>
+          </ul>
+        </Card.Content>
+      </Card>
+    </Container>
   );
 };
 
