@@ -5,7 +5,7 @@ import App from "./app/layout/App";
 import { createBrowserHistory } from "history";
 import { Router } from "react-router-dom";
 
-const history = createBrowserHistory();
+export const history = createBrowserHistory();
 
 ReactDOM.render(
   <Router history={history}>

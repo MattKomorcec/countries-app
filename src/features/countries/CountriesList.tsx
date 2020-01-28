@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useContext } from "react";
 import {
   Table,
   Image,
@@ -8,41 +7,26 @@ import {
   Loader,
   PaginationProps
 } from "semantic-ui-react";
-import { AxiosResponse } from "axios";
 import { ICountry } from "../../app/models/country";
-
-declare global {
-  interface Window {
-    countries?: ICountry[];
-  }
-}
-
-const LIMIT = 10;
-let TOTAL_COUNTRIES = 0;
-let TOTAL_PAGES = 0;
+import { history } from "../../index";
+import { observer } from "mobx-react-lite";
+import { CountryStoreContext } from "../../app/stores/countryStore";
 
 const CountriesList = () => {
-  const [countries, setCountries] = useState<ICountry[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const countryStore = useContext(CountryStoreContext);
+  const {
+    loading,
+    renderedCountries,
+    loadCountries,
+    totalPages,
+    setActiveFilter,
+    setCurrentPage,
+    currentPage
+  } = countryStore;
 
   useEffect(() => {
-    if (window.countries) {
-      setCountries(window.countries);
-    } else {
-      setLoading(true);
-      axios
-        .get("https://restcountries.eu/rest/v2/all")
-        .then((res: AxiosResponse) => res.data)
-        .then((res: ICountry[]) => {
-          setCountries(res);
-          window.countries = res;
-          TOTAL_COUNTRIES = res.length;
-          TOTAL_PAGES = Math.ceil(TOTAL_COUNTRIES / LIMIT);
-        })
-        .finally(() => setLoading(false));
-    }
-  }, []);
+    loadCountries();
+  }, [loadCountries]);
 
   const handlePageChange = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
@@ -50,18 +34,13 @@ const CountriesList = () => {
   ) => {
     if (data.activePage) {
       const activePage = parseInt(`${data.activePage}`);
-      setCurrentPage(activePage - 1 || 0);
+      setCurrentPage(activePage || 1);
     }
   };
 
-  const renderedCountries = [];
-  for (
-    let index = currentPage * LIMIT;
-    index < (currentPage + 1) * LIMIT;
-    index++
-  ) {
-    renderedCountries.push(countries[index]);
-  }
+  const handleRowClick = (country: ICountry) => {
+    history.push(`/countries/${country.alpha3Code}`);
+  };
 
   return loading ? (
     <Grid.Column width={16}>
@@ -73,22 +52,29 @@ const CountriesList = () => {
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell></Table.HeaderCell>
-            <Table.HeaderCell>Name</Table.HeaderCell>
+            <Table.HeaderCell onClick={() => setActiveFilter("name")}>
+              Name
+            </Table.HeaderCell>
             <Table.HeaderCell>Capital</Table.HeaderCell>
-            <Table.HeaderCell>Domain</Table.HeaderCell>
+            <Table.HeaderCell onClick={() => setActiveFilter("population")}>
+              Population
+            </Table.HeaderCell>
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
-          {countries.length !== 0 &&
-            renderedCountries.map((country: any) => (
-              <Table.Row key={country.name}>
+          {renderedCountries &&
+            renderedCountries.map((country: ICountry) => (
+              <Table.Row
+                key={country.name}
+                onClick={() => handleRowClick(country)}
+              >
                 <Table.Cell>
                   <Image src={country.flag} size="mini" />
                 </Table.Cell>
                 <Table.Cell>{country.name}</Table.Cell>
                 <Table.Cell>{country.capital}</Table.Cell>
-                <Table.Cell>{country.topLevelDomain[0]}</Table.Cell>
+                <Table.Cell>{country.population}</Table.Cell>
               </Table.Row>
             ))}
         </Table.Body>
@@ -97,8 +83,8 @@ const CountriesList = () => {
           <Table.Row>
             <Table.HeaderCell colSpan="4" textAlign="center">
               <Pagination
-                totalPages={TOTAL_PAGES}
-                defaultActivePage={1}
+                totalPages={totalPages}
+                activePage={currentPage}
                 onPageChange={handlePageChange}
               />
             </Table.HeaderCell>
@@ -109,4 +95,4 @@ const CountriesList = () => {
   );
 };
 
-export default CountriesList;
+export default observer(CountriesList);
